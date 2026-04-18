@@ -167,7 +167,7 @@ class ChartManager {
     // 更新图表数据
     updateChart(forecastData, mode = 'temperature') {
         if (!forecastData || !forecastData.hourly) {
-            console.warn('没有预报数据可用于图表');
+            console.warn('没有预报数据可用于图表', forecastData);
             return;
         }
 
@@ -179,17 +179,59 @@ class ChartManager {
         const temperatures = [];
         const humidities = [];
 
-        hourlyData.forEach(hour => {
-            // 格式化时间标签
-            const time = new Date(hour.fxTime);
-            const label = time.toLocaleTimeString('zh-CN', { 
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            
-            labels.push(label);
-            temperatures.push(parseFloat(hour.temp));
-            humidities.push(parseFloat(hour.humidity));
+        hourlyData.forEach((hour, index) => {
+            try {
+                // 格式化时间标签 - 处理带时区的时间格式
+                let time;
+                let label;
+                
+                if (hour.fxTime) {
+                    // 尝试解析时间，处理可能的时区格式问题
+                    time = new Date(hour.fxTime);
+                    
+                    // 检查时间是否有效
+                    if (isNaN(time.getTime())) {
+                        // 如果时间无效，尝试移除时区信息再解析
+                        const timeStr = hour.fxTime.replace(/\+08:00$/, '');
+                        time = new Date(timeStr + '+08:00'); // 重新添加时区
+                        
+                        if (isNaN(time.getTime())) {
+                            // 如果还是无效，使用索引作为后备
+                            label = `${index}:00`;
+                        } else {
+                            label = time.toLocaleTimeString('zh-CN', { 
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            });
+                        }
+                    } else {
+                        label = time.toLocaleTimeString('zh-CN', { 
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                    }
+                } else {
+                    // 如果没有时间数据，使用索引作为后备
+                    label = `${index}:00`;
+                }
+                
+                labels.push(label);
+                
+                // 解析温度值，确保是数字
+                const temp = parseFloat(hour.temp);
+                temperatures.push(isNaN(temp) ? 0 : temp);
+                
+                // 解析湿度值，确保是数字
+                const humidity = parseFloat(hour.humidity);
+                humidities.push(isNaN(humidity) ? 0 : humidity);
+                
+            } catch (error) {
+                console.error('处理小时数据时出错:', error, hour);
+                // 提供默认值
+                labels.push(`${index}:00`);
+                temperatures.push(0);
+                humidities.push(0);
+            }
         });
 
         // 更新图表数据
@@ -235,28 +277,50 @@ class ChartManager {
     updateChartTitle(forecastData) {
         if (!forecastData.updateTime) return;
 
-        const updateTime = new Date(forecastData.updateTime);
-        const title = `24小时预报 (更新于: ${updateTime.toLocaleTimeString('zh-CN', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-        })})`;
-
-        if (this.chart.options.plugins.title) {
-            this.chart.options.plugins.title.text = title;
-        } else {
-            this.chart.options.plugins.title = {
-                display: true,
-                text: title,
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text-color'),
-                font: {
-                    size: 16,
-                    weight: 'normal'
-                },
-                padding: {
-                    top: 10,
-                    bottom: 20
+        try {
+            let updateTime;
+            const timeStr = forecastData.updateTime;
+            
+            // 尝试解析更新时间
+            updateTime = new Date(timeStr);
+            
+            // 检查时间是否有效
+            if (isNaN(updateTime.getTime())) {
+                // 如果时间无效，尝试移除时区信息再解析
+                const cleanedTimeStr = timeStr.replace(/\+08:00$/, '');
+                updateTime = new Date(cleanedTimeStr + '+08:00');
+                
+                if (isNaN(updateTime.getTime())) {
+                    // 如果还是无效，使用当前时间
+                    updateTime = new Date();
                 }
-            };
+            }
+            
+            const title = `24小时预报 (更新于: ${updateTime.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            })})`;
+
+            if (this.chart.options.plugins.title) {
+                this.chart.options.plugins.title.text = title;
+            } else {
+                this.chart.options.plugins.title = {
+                    display: true,
+                    text: title,
+                    color: getComputedStyle(document.documentElement).getPropertyValue('--text-color'),
+                    font: {
+                        size: 16,
+                        weight: 'normal'
+                    },
+                    padding: {
+                        top: 10,
+                        bottom: 20
+                    }
+                };
+            }
+        } catch (error) {
+            console.error('更新图表标题时出错:', error);
+            // 出错时不设置标题
         }
     }
 
