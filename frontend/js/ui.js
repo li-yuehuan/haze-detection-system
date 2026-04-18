@@ -300,9 +300,44 @@ class UIManager {
             </div>
         `;
         
-        // 更新更新时间
-        const updateTime = new Date(weatherData.updateTime || new Date()).toLocaleTimeString('zh-CN');
-        document.getElementById('weather-updated').textContent = `更新于: ${updateTime}`;
+        // 更新更新时间 - 增强时间解析
+        let updateTimeStr;
+        try {
+            console.log('天气数据更新时间字段:', weatherData.updateTime);
+            
+            if (weatherData.updateTime) {
+                // 尝试解析时间
+                let updateTime = new Date(weatherData.updateTime);
+                
+                // 检查时间是否有效
+                if (isNaN(updateTime.getTime())) {
+                    console.warn('天气更新时间无效，使用当前时间');
+                    updateTime = new Date();
+                }
+                
+                updateTimeStr = updateTime.toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } else {
+                console.warn('天气数据没有updateTime字段，使用当前时间');
+                updateTimeStr = new Date().toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+        } catch (error) {
+            console.error('解析天气更新时间失败:', error);
+            updateTimeStr = new Date().toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit'
+            });
+        }
+        
+        document.getElementById('weather-updated').textContent = `更新于: ${updateTimeStr}`;
+        console.log('天气更新时间已设置为:', updateTimeStr);
     }
 
     // 更新空气质量显示
@@ -537,10 +572,44 @@ class UIManager {
                         console.warn('无法初始化图表管理器，跳过图表更新');
                     }
                     
-                    // 更新预报更新时间
-                    const updateTime = new Date(weatherResponse.data.forecast.updateTime || new Date()).toLocaleTimeString('zh-CN');
-                    document.getElementById('forecast-updated').textContent = `更新于: ${updateTime}`;
-                    console.log('预报更新时间已更新:', updateTime);
+                    // 更新预报更新时间 - 增强时间解析
+                    let forecastUpdateTimeStr;
+                    try {
+                        console.log('预报数据更新时间字段:', weatherResponse.data.forecast.updateTime);
+                        
+                        if (weatherResponse.data.forecast.updateTime) {
+                            // 尝试解析时间
+                            let forecastUpdateTime = new Date(weatherResponse.data.forecast.updateTime);
+                            
+                            // 检查时间是否有效
+                            if (isNaN(forecastUpdateTime.getTime())) {
+                                console.warn('预报更新时间无效，使用当前时间');
+                                forecastUpdateTime = new Date();
+                            }
+                            
+                            forecastUpdateTimeStr = forecastUpdateTime.toLocaleTimeString('zh-CN', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                        } else {
+                            console.warn('预报数据没有updateTime字段，使用当前时间');
+                            forecastUpdateTimeStr = new Date().toLocaleTimeString('zh-CN', { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                second: '2-digit'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('解析预报更新时间失败:', error);
+                        forecastUpdateTimeStr = new Date().toLocaleTimeString('zh-CN', { 
+                            hour: '2-digit', 
+                            minute: '2-digit'
+                        });
+                    }
+                    
+                    document.getElementById('forecast-updated').textContent = `更新于: ${forecastUpdateTimeStr}`;
+                    console.log('预报更新时间已设置为:', forecastUpdateTimeStr);
                 } else {
                     console.warn('预报数据不存在于响应中，weatherResponse.data:', weatherResponse.data);
                     console.warn('weatherResponse.data的所有属性:', Object.keys(weatherResponse.data));
