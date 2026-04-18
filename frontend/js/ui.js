@@ -336,8 +336,8 @@ class UIManager {
             });
         }
         
-        document.getElementById('weather-updated').textContent = `更新于: ${updateTimeStr}`;
-        console.log('天气更新时间已设置为:', updateTimeStr);
+        // 注意：已删除天气独立更新时间显示，只保留底部统一时间
+        console.log('天气数据已更新，底部统一时间将显示更新状态');
     }
 
     // 更新空气质量显示
@@ -368,9 +368,8 @@ class UIManager {
             </div>
         `;
         
-        // 更新更新时间
-        const updateTime = new Date().toLocaleTimeString('zh-CN');
-        document.getElementById('air-quality-updated').textContent = `更新于: ${updateTime}`;
+        // 注意：已删除空气质量独立更新时间显示，只保留底部统一时间
+        console.log('空气质量数据已更新，底部统一时间将显示更新状态');
         
         // 检查空气质量警报
         if (this.settings.airQualityAlert && cnAqi.aqi > 150) {
@@ -608,8 +607,8 @@ class UIManager {
                         });
                     }
                     
-                    document.getElementById('forecast-updated').textContent = `更新于: ${forecastUpdateTimeStr}`;
-                    console.log('预报更新时间已设置为:', forecastUpdateTimeStr);
+                    // 注意：已删除预报独立更新时间显示，只保留底部统一时间
+                    console.log('预报数据已更新，底部统一时间将显示更新状态');
                 } else {
                     console.warn('预报数据不存在于响应中，weatherResponse.data:', weatherResponse.data);
                     console.warn('weatherResponse.data的所有属性:', Object.keys(weatherResponse.data));
