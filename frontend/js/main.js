@@ -168,9 +168,9 @@ class HazeDetectionApp {
         const defaultAirQuality = {
             indexes: [
                 {
-                    code: 'us-epa',
+                    code: 'cn-mee',
                     aqi: 45,
-                    category: 'Good',
+                    category: '优',
                     health: {
                         effect: '空气质量令人满意，基本无空气污染',
                         advice: {

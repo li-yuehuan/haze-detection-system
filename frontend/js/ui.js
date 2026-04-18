@@ -311,18 +311,21 @@ class UIManager {
         
         this.currentAirQuality = airQualityData;
         
-        // 获取US AQI数据
-        const usAqi = airQualityData.indexes.find(index => index.code === 'us-epa');
-        if (!usAqi) return;
+        // 获取中国标准AQI数据
+        const cnAqi = airQualityData.indexes.find(index => index.code === 'cn-mee');
+        if (!cnAqi) {
+            console.error('未找到中国标准AQI数据 (cn-mee)', airQualityData.indexes);
+            return;
+        }
         
-        const aqiLevel = this.getAqiLevel(usAqi.aqi);
+        const aqiLevel = this.getAqiLevel(cnAqi.aqi);
         const airQualityCard = document.getElementById('air-quality-card');
         
         airQualityCard.innerHTML = `
             <div class="aqi-display">
-                <div class="aqi-value">${usAqi.aqi}</div>
+                <div class="aqi-value">${cnAqi.aqi}</div>
                 <div class="aqi-level ${aqiLevel.className}" style="background-color: ${aqiLevel.color}; color: ${aqiLevel.textColor}">
-                    ${aqiLevel.name} (${usAqi.category})
+                    ${aqiLevel.name} (${cnAqi.category})
                 </div>
             </div>
             <div class="pollutants-grid">
@@ -335,7 +338,7 @@ class UIManager {
         document.getElementById('air-quality-updated').textContent = `更新于: ${updateTime}`;
         
         // 检查空气质量警报
-        if (this.settings.airQualityAlert && usAqi.aqi > 150) {
+        if (this.settings.airQualityAlert && cnAqi.aqi > 150) {
             this.showNotification(`空气质量警报: ${aqiLevel.name}，建议减少户外活动`, 'warning');
         }
     }
@@ -372,11 +375,14 @@ class UIManager {
     updateHealthAdvice(airQualityData) {
         if (!airQualityData || !airQualityData.indexes) return;
         
-        const usAqi = airQualityData.indexes.find(index => index.code === 'us-epa');
-        if (!usAqi || !usAqi.health) return;
+        const cnAqi = airQualityData.indexes.find(index => index.code === 'cn-mee');
+        if (!cnAqi || !cnAqi.health) {
+            console.error('未找到中国标准AQI健康建议数据 (cn-mee)', airQualityData.indexes);
+            return;
+        }
         
         const healthCard = document.getElementById('health-card');
-        const aqiLevel = this.getAqiLevel(usAqi.aqi);
+        const aqiLevel = this.getAqiLevel(cnAqi.aqi);
         
         healthCard.innerHTML = `
             <div class="health-advice">
@@ -384,22 +390,22 @@ class UIManager {
                     <i class="fas fa-heartbeat"></i>
                     <span>健康影响</span>
                 </div>
-                <p>${usAqi.health.effect || aqiLevel.healthEffect}</p>
+                <p>${cnAqi.health.effect || aqiLevel.healthEffect}</p>
             </div>
             <div class="health-advice">
                 <div class="advice-title">
                     <i class="fas fa-user-friends"></i>
                     <span>一般人群建议</span>
                 </div>
-                <p>${usAqi.health.advice?.generalPopulation || aqiLevel.advice}</p>
+                <p>${cnAqi.health.advice?.generalPopulation || aqiLevel.advice}</p>
             </div>
-            ${usAqi.health.advice?.sensitivePopulation ? `
+            ${cnAqi.health.advice?.sensitivePopulation ? `
             <div class="health-advice">
                 <div class="advice-title">
                     <i class="fas fa-user-injured"></i>
                     <span>敏感人群建议</span>
                 </div>
-                <p>${usAqi.health.advice.sensitivePopulation}</p>
+                <p>${cnAqi.health.advice.sensitivePopulation}</p>
             </div>
             ` : ''}
         `;
