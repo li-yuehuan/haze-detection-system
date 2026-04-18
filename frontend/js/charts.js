@@ -166,28 +166,42 @@ class ChartManager {
 
     // 更新图表数据
     updateChart(forecastData, mode = 'temperature') {
+        console.log('图表更新被调用，数据:', forecastData);
+        console.log('数据中hourly属性是否存在?:', 'hourly' in forecastData);
+        
         if (!forecastData || !forecastData.hourly) {
             console.warn('没有预报数据可用于图表', forecastData);
+            console.warn('forecastData类型:', typeof forecastData);
+            console.warn('forecastData.hourly类型:', forecastData ? typeof forecastData.hourly : 'forecastData为空');
             return;
         }
 
+        console.log('hourly数组长度:', forecastData.hourly.length);
+        console.log('hourly数组第一个元素:', forecastData.hourly[0]);
+        
         this.currentMode = mode;
         
         // 处理数据
         const hourlyData = forecastData.hourly.slice(0, 24); // 只取前24小时
+        console.log('处理后的小时数据长度:', hourlyData.length);
+        
         const labels = [];
         const temperatures = [];
         const humidities = [];
 
         hourlyData.forEach((hour, index) => {
             try {
+                console.log(`处理第${index}小时数据:`, hour);
+                
                 // 格式化时间标签 - 处理带时区的时间格式
                 let time;
                 let label;
                 
                 if (hour.fxTime) {
+                    console.log(`小时${index}的fxTime:`, hour.fxTime);
                     // 尝试解析时间，处理可能的时区格式问题
                     time = new Date(hour.fxTime);
+                    console.log(`解析后的时间:`, time, '是否有效:', !isNaN(time.getTime()));
                     
                     // 检查时间是否有效
                     if (isNaN(time.getTime())) {
@@ -198,31 +212,37 @@ class ChartManager {
                         if (isNaN(time.getTime())) {
                             // 如果还是无效，使用索引作为后备
                             label = `${index}:00`;
+                            console.log(`时间解析失败，使用后备标签: ${label}`);
                         } else {
                             label = time.toLocaleTimeString('zh-CN', { 
                                 hour: '2-digit',
                                 minute: '2-digit'
                             });
+                            console.log(`时间解析成功，标签: ${label}`);
                         }
                     } else {
                         label = time.toLocaleTimeString('zh-CN', { 
                             hour: '2-digit',
                             minute: '2-digit'
                         });
+                        console.log(`时间解析成功，标签: ${label}`);
                     }
                 } else {
                     // 如果没有时间数据，使用索引作为后备
                     label = `${index}:00`;
+                    console.log(`没有fxTime，使用后备标签: ${label}`);
                 }
                 
                 labels.push(label);
                 
                 // 解析温度值，确保是数字
                 const temp = parseFloat(hour.temp);
+                console.log(`小时${index}的温度:`, hour.temp, '解析后:', temp, '是否有效:', !isNaN(temp));
                 temperatures.push(isNaN(temp) ? 0 : temp);
                 
                 // 解析湿度值，确保是数字
                 const humidity = parseFloat(hour.humidity);
+                console.log(`小时${index}的湿度:`, hour.humidity, '解析后:', humidity, '是否有效:', !isNaN(humidity));
                 humidities.push(isNaN(humidity) ? 0 : humidity);
                 
             } catch (error) {
@@ -234,6 +254,10 @@ class ChartManager {
             }
         });
 
+        console.log('生成的标签:', labels);
+        console.log('生成的温度数据:', temperatures);
+        console.log('生成的湿度数据:', humidities);
+        
         // 更新图表数据
         this.chart.data.labels = labels;
         this.chart.data.datasets[0].data = temperatures;
@@ -270,7 +294,9 @@ class ChartManager {
         this.updateChartTitle(forecastData);
 
         // 更新图表
+        console.log('开始更新图表...');
         this.chart.update();
+        console.log('图表更新完成');
     }
 
     // 更新图表标题

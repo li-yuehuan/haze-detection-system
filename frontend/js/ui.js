@@ -470,6 +470,11 @@ class UIManager {
             }
             
             if (weatherResponse.data.forecast) {
+                console.log('预报数据接收成功:', weatherResponse.data.forecast);
+                console.log('hourly数组是否存在?:', 'hourly' in weatherResponse.data.forecast);
+                console.log('hourly数组长度:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.length : 0);
+                console.log('hourly数组前2个元素:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.slice(0, 2) : '无');
+                
                 this.currentForecast = weatherResponse.data.forecast;
                 if (window.chartManager) {
                     window.chartManager.updateChart(weatherResponse.data.forecast, 'temperature');
@@ -478,6 +483,8 @@ class UIManager {
                 // 更新预报更新时间
                 const updateTime = new Date(weatherResponse.data.forecast.updateTime || new Date()).toLocaleTimeString('zh-CN');
                 document.getElementById('forecast-updated').textContent = `更新于: ${updateTime}`;
+            } else {
+                console.warn('预报数据不存在于响应中:', weatherResponse.data);
             }
             
             // 更新最后数据更新时间
