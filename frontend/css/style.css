@@ -217,7 +217,9 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
-    padding: 0 5px;
+    padding: 0 25px;               /* 与卡片内边距对齐 */
+    background-color: transparent;
+    border-bottom: none;
 }
 
 .section-header h2 {
@@ -226,10 +228,13 @@ body {
     gap: 10px;
     font-size: 1.3rem;
     font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
 }
 
 .section-header i {
     color: var(--primary-color);
+    font-size: 1.4rem;
 }
 
 .last-updated {
@@ -250,6 +255,7 @@ body {
     min-height: 200px;
     display: flex;
     flex-direction: column;
+    border-top: 3px solid var(--primary-color); /* 主题色上边框 */
 }
 
 .weather-card:hover,
@@ -751,6 +757,10 @@ input:checked + .slider:before {
     .main-content {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+    
+    .section-header {
+        padding: 0 15px;           /* 与卡片在小屏时的内边距保持一致 */
     }
     
     .weather-content {
