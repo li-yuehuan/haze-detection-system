@@ -106,6 +106,9 @@ QWEATHER_PROJECT_ID=你的项目ID
 # 服务器配置
 PORT=3000
 NODE_ENV=development
+
+# 数据存储配置
+DATA_FILE_PATH=./backend/data/locations.json
 ```
 
 ### 4. 准备和风天气JWT密钥
