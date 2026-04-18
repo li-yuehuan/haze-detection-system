@@ -3,7 +3,25 @@ class ChartManager {
     constructor() {
         this.chart = null;
         this.currentMode = 'temperature';
+        this.isInitialized = false;
+        // 不在这里调用initChart()，等待显式初始化
+    }
+
+    // 初始化图表
+    init() {
+        if (this.isInitialized) {
+            console.log('图表已经初始化');
+            return;
+        }
+        
+        if (!uiManager) {
+            console.error('uiManager未定义，无法初始化图表');
+            return;
+        }
+        
         this.initChart();
+        this.isInitialized = true;
+        console.log('图表初始化完成');
     }
 
     // 初始化图表

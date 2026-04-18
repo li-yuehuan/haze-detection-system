@@ -517,7 +517,7 @@ class UIManager {
                         console.warn('图表管理器不存在，尝试初始化...');
                         if (typeof ChartManager !== 'undefined') {
                             window.chartManager = new ChartManager();
-                            console.log('图表管理器初始化成功');
+                            console.log('图表管理器实例创建成功');
                         } else {
                             console.error('ChartManager类未定义，请检查charts.js是否已加载');
                             // 即使没有图表管理器，也继续处理其他数据
@@ -525,6 +525,12 @@ class UIManager {
                     }
                     
                     if (window.chartManager) {
+                        // 确保图表已初始化
+                        if (typeof window.chartManager.init === 'function' && !window.chartManager.isInitialized) {
+                            console.log('图表未初始化，正在初始化...');
+                            window.chartManager.init();
+                        }
+                        
                         console.log('图表管理器存在，开始更新图表');
                         window.chartManager.updateChart(weatherResponse.data.forecast, 'temperature');
                     } else {

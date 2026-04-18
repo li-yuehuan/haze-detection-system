@@ -305,6 +305,22 @@ class HazeDetectionApp {
 
 // 应用程序启动
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded触发，开始初始化应用...');
+    
+    // 确保uiManager已定义
+    if (!window.uiManager) {
+        console.error('uiManager未定义，请检查ui.js是否已加载');
+        return;
+    }
+    
+    // 确保chartManager已定义并初始化
+    if (window.chartManager && typeof window.chartManager.init === 'function') {
+        console.log('初始化图表管理器...');
+        window.chartManager.init();
+    } else {
+        console.warn('图表管理器未定义或没有init方法');
+    }
+    
     // 创建全局应用程序实例
     window.app = new HazeDetectionApp();
     
