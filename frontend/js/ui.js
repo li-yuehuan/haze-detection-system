@@ -428,9 +428,23 @@ class UIManager {
                 break;
         }
         
+        // 检查图表管理器是否存在，如果不存在则尝试初始化
+        if (!window.chartManager) {
+            console.warn('图表管理器不存在，尝试初始化...');
+            if (typeof ChartManager !== 'undefined') {
+                window.chartManager = new ChartManager();
+                console.log('图表管理器初始化成功');
+            } else {
+                console.error('ChartManager类未定义，请检查charts.js是否已加载');
+                return; // 无法继续
+            }
+        }
+        
         // 更新图表
         if (window.chartManager && this.currentForecast) {
             window.chartManager.updateChart(this.currentForecast, mode);
+        } else if (!this.currentForecast) {
+            console.warn('没有预报数据可用于图表更新');
         }
     }
 
@@ -497,11 +511,24 @@ class UIManager {
                     console.log('hourly数组前2个元素:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.slice(0, 2) : '无');
                     
                     this.currentForecast = weatherResponse.data.forecast;
+                    
+                    // 检查图表管理器是否存在，如果不存在则尝试初始化
+                    if (!window.chartManager) {
+                        console.warn('图表管理器不存在，尝试初始化...');
+                        if (typeof ChartManager !== 'undefined') {
+                            window.chartManager = new ChartManager();
+                            console.log('图表管理器初始化成功');
+                        } else {
+                            console.error('ChartManager类未定义，请检查charts.js是否已加载');
+                            // 即使没有图表管理器，也继续处理其他数据
+                        }
+                    }
+                    
                     if (window.chartManager) {
                         console.log('图表管理器存在，开始更新图表');
                         window.chartManager.updateChart(weatherResponse.data.forecast, 'temperature');
                     } else {
-                        console.warn('图表管理器不存在');
+                        console.warn('无法初始化图表管理器，跳过图表更新');
                     }
                     
                     // 更新预报更新时间
