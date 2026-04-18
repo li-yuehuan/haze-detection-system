@@ -42,7 +42,7 @@
 ## 项目结构
 
 ```
-雾霾检测系统/
+haze-detection-system/
 ├── frontend/                 # 前端代码
 │   ├── index.html           # 主页面
 │   ├── css/
@@ -67,7 +67,7 @@
 ├── package.json            # 项目配置
 ├── .env.example            # 环境变量示例
 ├── README.md               # 项目说明
-└── 相关文件/               # API文档和密钥
+└── .gitignore             # Git忽略文件
 ```
 
 ## 快速开始
@@ -77,9 +77,9 @@
 # 确保已安装 Node.js (版本 >= 14.0.0)
 node --version
 
-# 克隆或下载项目
-git clone <repository-url>
-cd 雾霾检测系统
+# 克隆GitHub仓库
+git clone https://github.com/li-yuehuan/haze-detection-system.git
+cd haze-detection-system
 ```
 
 ### 2. 安装依赖
@@ -148,7 +148,7 @@ npm start
 ### 本地部署
 1. 按照"快速开始"步骤配置和运行
 2. 确保防火墙开放3000端口
-3. 可通过Nginx反向代理提供HTTPS支持
+
 
 ### 服务器部署（Ubuntu 24.04）
 ```bash
@@ -156,8 +156,8 @@ npm start
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# 2. 克隆项目
-git clone <repository-url>
+# 2. 克隆GitHub仓库
+git clone https://github.com/li-yuehuan/haze-detection-system.git
 cd haze-detection-system
 
 # 3. 安装依赖
@@ -247,24 +247,9 @@ pm2 logs haze-detection
 sudo tail -f /var/log/nginx/error.log
 ```
 
-## 许可证
 
-MIT License
+## GitHub仓库
 
-## 贡献指南
-
-1. Fork项目
-2. 创建功能分支
-3. 提交更改
-4. 推送到分支
-5. 创建Pull Request
-
-## 联系方式
-
-如有问题或建议，请通过以下方式联系：
-- 提交GitHub Issue
-- 查看项目文档
-
----
+项目已上传到GitHub：https://github.com/li-yuehuan/haze-detection-system
 
 **注意**：本项目为学术用途，实际部署时请注意API使用限制和数据安全。
