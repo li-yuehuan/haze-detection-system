@@ -358,13 +358,15 @@ class UIManager {
         
         airQualityCard.innerHTML = `
             <div class="aqi-display">
-                <div class="aqi-value">${cnAqi.aqi}</div>
-                <div class="aqi-level ${aqiLevel.className}" style="background-color: ${aqiLevel.color}; color: ${aqiLevel.textColor}">
-                    ${aqiLevel.name} (${cnAqi.category})
+                <div class="aqi-display-left">
+                    <div class="aqi-value">${cnAqi.aqi}</div>
+                    <div class="aqi-level ${aqiLevel.className}" style="background-color: ${aqiLevel.color}; color: ${aqiLevel.textColor}">
+                        ${aqiLevel.name} (${cnAqi.category})
+                    </div>
                 </div>
-            </div>
-            <div class="pollutants-grid">
-                ${this.generatePollutantsHTML(airQualityData.pollutants)}
+                <div class="pollutants-right">
+                    ${this.generatePollutantsHTML(airQualityData.pollutants)}
+                </div>
             </div>
         `;
         

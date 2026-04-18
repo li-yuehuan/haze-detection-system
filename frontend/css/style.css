@@ -608,10 +608,118 @@ input:checked + .slider:before {
 .notification.warning { border-left-color: var(--warning-color); }
 .notification.info { border-left-color: var(--info-color); }
 
+/* 电脑端布局优化 - 两行两列网格 */
+@media (min-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 25px;
+    }
+    
+    /* 第一行：实时天气 + 空气质量 */
+    .weather-section {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    
+    .air-quality-section {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    
+    /* 第二行：健康建议 + 24小时预测 */
+    .health-section {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    
+    .forecast-section {
+        grid-column: 2;
+        grid-row: 2;
+        min-height: 450px;
+    }
+    
+    /* 增大预测图表尺寸 */
+    .forecast-section .chart-container {
+        height: 380px;
+    }
+    
+    /* 空气质量卡片内部左右布局 */
+    .air-quality-card .aqi-display {
+        display: flex;
+        gap: 25px;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .air-quality-card .aqi-display-left {
+        flex: 1;
+        text-align: center;
+        min-width: 140px;
+    }
+    
+    .air-quality-card .aqi-value {
+        font-size: 3.2rem;
+        margin-bottom: 8px;
+    }
+    
+    .air-quality-card .aqi-level {
+        font-size: 1.2rem;
+        padding: 8px 16px;
+    }
+    
+    .air-quality-card .pollutants-right {
+        flex: 2;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .air-quality-card .pollutant-item {
+        padding: 10px;
+        text-align: center;
+        background-color: var(--bg-color);
+        border-radius: 8px;
+        transition: var(--transition);
+    }
+    
+    .air-quality-card .pollutant-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+}
+
 /* 响应式设计 */
-@media (max-width: 1200px) {
+@media (max-width: 1200px) and (min-width: 1024px) {
     .main-content {
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-rows: auto;
+    }
+    
+    /* 重置电脑端布局，使用自适应布局 */
+    .weather-section,
+    .air-quality-section,
+    .health-section,
+    .forecast-section {
+        grid-column: auto;
+        grid-row: auto;
+    }
+    
+    .forecast-section {
+        min-height: auto;
+    }
+    
+    .forecast-section .chart-container {
+        height: 300px;
+    }
+    
+    /* 重置空气质量卡片布局 */
+    .air-quality-card .aqi-display {
+        display: block;
+    }
+    
+    .air-quality-card .pollutants-right {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
 }
 
