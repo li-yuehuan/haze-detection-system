@@ -108,7 +108,13 @@ class APIClient {
         if (locationData.rectangle) params.append('rectangle', locationData.rectangle);
         
         const endpoint = `${AppConfig.API_ENDPOINTS.WEATHER_COMPREHENSIVE}?${params.toString()}`;
-        return this.request(endpoint);
+        console.log('调用综合天气API，端点:', endpoint);
+        const result = await this.request(endpoint);
+        console.log('综合天气API响应结果:', result);
+        console.log('响应结果类型:', typeof result);
+        console.log('响应结果包含data属性?:', 'data' in result);
+        console.log('响应结果包含forecast属性?:', 'forecast' in result);
+        return result;
     }
 
     // 获取实时天气

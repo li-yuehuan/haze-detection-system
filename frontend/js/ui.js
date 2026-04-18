@@ -460,32 +460,63 @@ class UIManager {
             // 获取综合天气信息
             const weatherResponse = await apiClient.getComprehensiveWeather(locationResponse.data);
             
-            if (weatherResponse.data.weather) {
-                this.updateWeatherDisplay(weatherResponse.data.weather);
-            }
+            // 添加详细的调试日志
+            console.log('=== 开始调试天气响应数据 ===');
+            console.log('完整的weatherResponse:', weatherResponse);
+            console.log('weatherResponse类型:', typeof weatherResponse);
+            console.log('weatherResponse.success:', weatherResponse.success);
+            console.log('weatherResponse.data是否存在?:', 'data' in weatherResponse);
             
-            if (weatherResponse.data.airQuality) {
-                this.updateAirQualityDisplay(weatherResponse.data.airQuality);
-                this.updateHealthAdvice(weatherResponse.data.airQuality);
-            }
-            
-            if (weatherResponse.data.forecast) {
-                console.log('预报数据接收成功:', weatherResponse.data.forecast);
-                console.log('hourly数组是否存在?:', 'hourly' in weatherResponse.data.forecast);
-                console.log('hourly数组长度:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.length : 0);
-                console.log('hourly数组前2个元素:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.slice(0, 2) : '无');
+            if (weatherResponse.data) {
+                console.log('weatherResponse.data:', weatherResponse.data);
+                console.log('weatherResponse.data类型:', typeof weatherResponse.data);
+                console.log('weatherResponse.data.forecast是否存在?:', 'forecast' in weatherResponse.data);
                 
-                this.currentForecast = weatherResponse.data.forecast;
-                if (window.chartManager) {
-                    window.chartManager.updateChart(weatherResponse.data.forecast, 'temperature');
+                if (weatherResponse.data.weather) {
+                    console.log('天气数据存在，开始更新天气显示');
+                    this.updateWeatherDisplay(weatherResponse.data.weather);
+                } else {
+                    console.warn('天气数据不存在于响应中');
                 }
                 
-                // 更新预报更新时间
-                const updateTime = new Date(weatherResponse.data.forecast.updateTime || new Date()).toLocaleTimeString('zh-CN');
-                document.getElementById('forecast-updated').textContent = `更新于: ${updateTime}`;
+                if (weatherResponse.data.airQuality) {
+                    console.log('空气质量数据存在，开始更新空气质量显示');
+                    this.updateAirQualityDisplay(weatherResponse.data.airQuality);
+                    this.updateHealthAdvice(weatherResponse.data.airQuality);
+                } else {
+                    console.warn('空气质量数据不存在于响应中');
+                }
+                
+                if (weatherResponse.data.forecast) {
+                    console.log('预报数据接收成功，详细分析:');
+                    console.log('forecast对象:', weatherResponse.data.forecast);
+                    console.log('forecast类型:', typeof weatherResponse.data.forecast);
+                    console.log('forecast.code:', weatherResponse.data.forecast.code);
+                    console.log('hourly数组是否存在?:', 'hourly' in weatherResponse.data.forecast);
+                    console.log('hourly数组长度:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.length : 0);
+                    console.log('hourly数组前2个元素:', weatherResponse.data.forecast.hourly ? weatherResponse.data.forecast.hourly.slice(0, 2) : '无');
+                    
+                    this.currentForecast = weatherResponse.data.forecast;
+                    if (window.chartManager) {
+                        console.log('图表管理器存在，开始更新图表');
+                        window.chartManager.updateChart(weatherResponse.data.forecast, 'temperature');
+                    } else {
+                        console.warn('图表管理器不存在');
+                    }
+                    
+                    // 更新预报更新时间
+                    const updateTime = new Date(weatherResponse.data.forecast.updateTime || new Date()).toLocaleTimeString('zh-CN');
+                    document.getElementById('forecast-updated').textContent = `更新于: ${updateTime}`;
+                    console.log('预报更新时间已更新:', updateTime);
+                } else {
+                    console.warn('预报数据不存在于响应中，weatherResponse.data:', weatherResponse.data);
+                    console.warn('weatherResponse.data的所有属性:', Object.keys(weatherResponse.data));
+                }
             } else {
-                console.warn('预报数据不存在于响应中:', weatherResponse.data);
+                console.error('weatherResponse.data不存在，weatherResponse:', weatherResponse);
             }
+            
+            console.log('=== 结束调试天气响应数据 ===');
             
             // 更新最后数据更新时间
             const now = new Date().toLocaleTimeString('zh-CN');
