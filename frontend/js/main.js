@@ -307,51 +307,94 @@ class HazeDetectionApp {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded触发，开始初始化应用...');
     
-    // 确保uiManager已定义
-    if (!window.uiManager) {
-        console.error('uiManager未定义，请检查ui.js是否已加载');
-        return;
-    }
-    
-    // 确保chartManager已定义并初始化
-    if (window.chartManager && typeof window.chartManager.init === 'function') {
-        console.log('初始化图表管理器...');
-        window.chartManager.init();
-    } else {
-        console.warn('图表管理器未定义或没有init方法');
-    }
-    
-    // 创建全局应用程序实例
-    window.app = new HazeDetectionApp();
-    
-    // 将常用方法暴露给全局
-    window.refreshData = () => uiManager.refreshAllData();
-    window.exportData = () => window.app.exportData();
-    window.getAppStatus = () => window.app.getAppStatus();
-    
-    // 添加调试模式（开发环境）
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.log('开发模式已启用');
-        window.debugMode = true;
+    // 使用setTimeout延迟执行，确保所有JS文件已加载
+    setTimeout(() => {
+        console.log('延迟初始化开始，检查全局变量...');
+        console.log('window.uiManager:', window.uiManager);
+        console.log('window.chartManager:', window.chartManager);
+        console.log('window.apiClient:', window.apiClient);
+        console.log('AppConfig:', typeof AppConfig);
         
-        // 添加调试快捷键
-        document.addEventListener('keydown', (event) => {
-            if (event.ctrlKey && event.shiftKey && event.key === 'D') {
-                event.preventDefault();
-                console.log('应用状态:', window.getAppStatus());
-                console.log('当前设置:', uiManager.settings);
-                console.log('缓存大小:', apiClient.cache.size);
-                uiManager.showNotification('调试信息已输出到控制台', 'info');
+        // 临时注释掉uiManager检查，让页面能够加载
+        // 确保uiManager已定义
+        if (!window.uiManager) {
+            console.warn('uiManager未定义，尝试继续初始化...');
+            // 尝试手动创建uiManager
+            if (typeof UIManager !== 'undefined') {
+                console.log('UIManager类已定义，尝试创建实例...');
+                window.uiManager = new UIManager();
+                console.log('手动创建uiManager成功:', window.uiManager);
+            } else {
+                console.error('UIManager类未定义，ui.js可能未正确加载');
+                // 显示错误信息，但不阻止页面加载
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'padding: 20px; background: #f8d7da; color: #721c24; margin: 10px; border-radius: 5px;';
+                errorMsg.innerHTML = '<strong>警告:</strong> UI管理器未正确加载。请刷新页面或检查控制台错误。';
+                document.querySelector('.main-content').prepend(errorMsg);
             }
-        });
-    }
-    
-    // 添加服务工作者（如果支持）
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js').catch(error => {
-                console.log('Service Worker 注册失败:', error);
+        }
+        
+        // 确保chartManager已定义并初始化
+        if (window.chartManager && typeof window.chartManager.init === 'function') {
+            console.log('初始化图表管理器...');
+            window.chartManager.init();
+        } else {
+            console.warn('图表管理器未定义或没有init方法');
+        }
+        
+        // 创建全局应用程序实例
+        try {
+            window.app = new HazeDetectionApp();
+            console.log('应用程序实例创建成功');
+        } catch (error) {
+            console.error('创建应用程序实例失败:', error);
+            // 显示错误但不阻止页面
+            const errorMsg = document.createElement('div');
+            errorMsg.style.cssText = 'padding: 20px; background: #f8d7da; color: #721c24; margin: 10px; border-radius: 5px;';
+            errorMsg.innerHTML = `<strong>应用程序初始化错误:</strong> ${error.message}`;
+            document.querySelector('.main-content').prepend(errorMsg);
+        }
+        
+        // 将常用方法暴露给全局
+        window.refreshData = () => {
+            if (window.uiManager) {
+                window.uiManager.refreshAllData();
+            } else {
+                console.error('无法刷新数据：uiManager未定义');
+                alert('UI管理器未初始化，请刷新页面');
+            }
+        };
+        window.exportData = () => window.app ? window.app.exportData() : console.error('app未定义');
+        window.getAppStatus = () => window.app ? window.app.getAppStatus() : { error: 'app未定义' };
+        
+        // 添加调试模式（开发环境）
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            console.log('开发模式已启用');
+            window.debugMode = true;
+            
+            // 添加调试快捷键
+            document.addEventListener('keydown', (event) => {
+                if (event.ctrlKey && event.shiftKey && event.key === 'D') {
+                    event.preventDefault();
+                    console.log('应用状态:', window.getAppStatus());
+                    console.log('当前设置:', window.uiManager ? window.uiManager.settings : 'uiManager未定义');
+                    console.log('缓存大小:', window.apiClient ? window.apiClient.cache?.size : 'apiClient未定义');
+                    if (window.uiManager) {
+                        window.uiManager.showNotification('调试信息已输出到控制台', 'info');
+                    }
+                }
             });
-        });
-    }
+        }
+        
+        // 添加服务工作者（如果支持）
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').catch(error => {
+                    console.log('Service Worker 注册失败:', error);
+                });
+            });
+        }
+        
+        console.log('应用程序初始化完成');
+    }, 100); // 100ms延迟，确保所有JS文件已加载
 });
