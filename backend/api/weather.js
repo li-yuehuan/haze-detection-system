@@ -4,7 +4,7 @@ const apiClient = require('../utils/apiClient');
 
 // 从矩形字符串中提取经纬度
 function extractCoordinates(rectangle) {
-  if (!rectangle) return { lat: 39.9042, lon: 116.4074 }; // 默认北京
+  if (!rectangle) return { lat: 39.90, lon: 116.41 }; // 默认北京，2位小数
   
   try {
     // 矩形格式: "116.123,39.456;116.789,39.012"
@@ -16,16 +16,20 @@ function extractCoordinates(rectangle) {
     const lat = (lat1 + lat2) / 2;
     const lon = (lon1 + lon2) / 2;
     
-    return { lat, lon };
+    // 根据API文档要求：最多支持小数点后两位
+    return { 
+      lat: parseFloat(lat.toFixed(2)), 
+      lon: parseFloat(lon.toFixed(2)) 
+    };
   } catch (error) {
     console.error('解析坐标失败:', error);
-    return { lat: 39.9042, lon: 116.4074 }; // 默认北京
+    return { lat: 39.90, lon: 116.41 }; // 默认北京，2位小数
   }
 }
 
 // 获取位置坐标（从rectangle提取经纬度）
 function getLocationCoordinates(rectangle) {
-  if (!rectangle) return '116.4074,39.9042'; // 默认北京坐标
+  if (!rectangle) return '116.41,39.90'; // 默认北京坐标，2位小数
   
   try {
     // 矩形格式: "116.123,39.456;116.789,39.012"
@@ -38,10 +42,11 @@ function getLocationCoordinates(rectangle) {
     const lon = (lon1 + lon2) / 2;
     
     // 返回经纬度字符串，格式：经度,纬度
-    return `${lon.toFixed(4)},${lat.toFixed(4)}`;
+    // 根据API文档要求：最多支持小数点后两位
+    return `${lon.toFixed(2)},${lat.toFixed(2)}`;
   } catch (error) {
     console.error('解析坐标失败:', error);
-    return '116.4074,39.9042'; // 默认北京坐标
+    return '116.41,39.90'; // 默认北京坐标，2位小数
   }
 }
 
@@ -57,8 +62,8 @@ router.get('/comprehensive', async (req, res) => {
       });
     }
 
-    const locationCoordinates = rectangle ? getLocationCoordinates(rectangle) : '116.4074,39.9042';
-    const coordinates = rectangle ? extractCoordinates(rectangle) : { lat: 39.9042, lon: 116.4074 };
+    const locationCoordinates = rectangle ? getLocationCoordinates(rectangle) : '116.41,39.90';
+    const coordinates = rectangle ? extractCoordinates(rectangle) : { lat: 39.90, lon: 116.41 };
 
     console.log(`获取综合天气信息，位置: ${city || '未知'}, 坐标: ${JSON.stringify(coordinates)}`);
 
