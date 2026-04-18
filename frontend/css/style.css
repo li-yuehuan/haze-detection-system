@@ -612,46 +612,44 @@ input:checked + .slider:before {
 @media (min-width: 1024px) {
     .main-content {
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: auto auto;
+        grid-template-rows: 1fr 1fr;          /* 两行均分高度 */
         gap: 25px;
+        min-height: calc(100vh - var(--header-height) - var(--footer-height) - 60px); /* 视口计算高度 */
     }
     
-    /* 第一行：实时天气 + 空气质量 */
-    .weather-section {
-        grid-column: 1;
-        grid-row: 1;
-        min-height: 500px;
-    }
-    
-    .air-quality-section {
-        grid-column: 2;
-        grid-row: 1;
-        min-height: 500px;
-    }
-    
-    /* 第二行：健康建议 + 24小时预测 */
-    .health-section {
-        grid-column: 1;
-        grid-row: 2;
-        min-height: 500px;
-    }
-    
+    /* 移除各区块的固定 min-height，改用 height: 100% 填满网格单元格 */
+    .weather-section,
+    .air-quality-section,
+    .health-section,
     .forecast-section {
-        grid-column: 2;
-        grid-row: 2;
-        min-height: 500px;
+        grid-column: auto;  /* 恢复自动放置（已在父级定义） */
+        grid-row: auto;
+        min-height: auto;
+        height: 100%;
+        display: flex;      /* 让内部卡片可以拉伸 */
     }
     
-    /* 增大预测图表尺寸，与健康建议卡片对齐 */
-    .forecast-section .chart-container {
-        height: 420px;
-    }
+    /* 明确指定网格位置，避免混乱 */
+    .weather-section { grid-area: 1 / 1 / 2 / 2; }
+    .air-quality-section { grid-area: 1 / 2 / 2 / 3; }
+    .health-section { grid-area: 2 / 1 / 3 / 2; }
+    .forecast-section { grid-area: 2 / 2 / 3 / 3; }
     
-    /* 确保所有卡片内容都能填满高度 */
+    /* 卡片填满区块，并允许内部滚动 */
     .weather-card,
     .air-quality-card,
-    .health-card {
+    .health-card,
+    .forecast-card {
         height: 100%;
+        width: 100%;
+        overflow-y: auto;   /* 内容过多时滚动，防止撑破布局 */
+    }
+    
+    /* 预测图表容器高度自适应 */
+    .forecast-section .chart-container {
+        height: auto;
+        min-height: 300px;
+        flex: 1;
     }
     
     /* 空气质量卡片内部左右布局 */
@@ -660,6 +658,7 @@ input:checked + .slider:before {
         gap: 25px;
         align-items: center;
         margin-bottom: 20px;
+        flex-wrap: wrap;    /* 窄屏时换行 */
     }
     
     .air-quality-card .aqi-display-left {
