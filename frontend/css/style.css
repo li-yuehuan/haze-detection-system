@@ -636,12 +636,17 @@ input:checked + .slider:before {
     .forecast-section {
         grid-column: 2;
         grid-row: 2;
-        min-height: 450px;
+        min-height: 500px;
     }
     
-    /* 增大预测图表尺寸 */
+    /* 增大预测图表尺寸，与健康建议卡片对齐 */
     .forecast-section .chart-container {
-        height: 380px;
+        height: 420px;
+    }
+    
+    /* 确保健康建议卡片也有足够高度 */
+    .health-section {
+        min-height: 500px;
     }
     
     /* 空气质量卡片内部左右布局 */

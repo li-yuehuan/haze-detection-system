@@ -361,7 +361,7 @@ class UIManager {
                 <div class="aqi-display-left">
                     <div class="aqi-value">${cnAqi.aqi}</div>
                     <div class="aqi-level ${aqiLevel.className}" style="background-color: ${aqiLevel.color}; color: ${aqiLevel.textColor}">
-                        ${aqiLevel.name} (${cnAqi.category})
+                        ${aqiLevel.name}
                     </div>
                 </div>
                 <div class="pollutants-right">
