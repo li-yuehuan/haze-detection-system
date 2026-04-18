@@ -23,13 +23,26 @@ function extractCoordinates(rectangle) {
   }
 }
 
-// 获取城市编码（adcode转location ID）
-function getLocationId(adcode) {
-  if (!adcode) return '101010100'; // 默认北京
+// 获取位置坐标（从rectangle提取经纬度）
+function getLocationCoordinates(rectangle) {
+  if (!rectangle) return '116.4074,39.9042'; // 默认北京坐标
   
-  // 和风天气使用6位城市代码，高德地图adcode也是6位
-  // 但需要验证格式，这里简单返回adcode
-  return adcode;
+  try {
+    // 矩形格式: "116.123,39.456;116.789,39.012"
+    const [point1, point2] = rectangle.split(';');
+    const [lon1, lat1] = point1.split(',').map(Number);
+    const [lon2, lat2] = point2.split(',').map(Number);
+    
+    // 计算中心点
+    const lat = (lat1 + lat2) / 2;
+    const lon = (lon1 + lon2) / 2;
+    
+    // 返回经纬度字符串，格式：经度,纬度
+    return `${lon.toFixed(4)},${lat.toFixed(4)}`;
+  } catch (error) {
+    console.error('解析坐标失败:', error);
+    return '116.4074,39.9042'; // 默认北京坐标
+  }
 }
 
 // 获取综合天气信息（实时天气 + 空气质量）
@@ -44,16 +57,16 @@ router.get('/comprehensive', async (req, res) => {
       });
     }
 
-    const locationId = adcode ? getLocationId(adcode) : '101010100';
+    const locationCoordinates = rectangle ? getLocationCoordinates(rectangle) : '116.4074,39.9042';
     const coordinates = rectangle ? extractCoordinates(rectangle) : { lat: 39.9042, lon: 116.4074 };
 
     console.log(`获取综合天气信息，位置: ${city || '未知'}, 坐标: ${JSON.stringify(coordinates)}`);
 
     // 并行获取所有数据
     const [weatherResult, airQualityResult, forecastResult] = await Promise.allSettled([
-      apiClient.getCurrentWeather(locationId),
+      apiClient.getCurrentWeather(locationCoordinates),
       apiClient.getAirQuality(coordinates.lat, coordinates.lon),
-      apiClient.get24HourForecast(locationId)
+      apiClient.get24HourForecast(locationCoordinates)
     ]);
 
     // 处理实时天气结果
