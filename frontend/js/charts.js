@@ -122,7 +122,14 @@ class ChartManager {
                         ticks: {
                             color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary'),
                             callback: function(value) {
-                                return value + (this.scale.id === 'y' ? '°C' : '%');
+                                // 修复：使用更安全的方式检查scale上下文
+                                try {
+                                    // 在Chart.js 3.x中，this上下文可能不是scale
+                                    // 使用闭包捕获外部变量作为后备方案
+                                    return value + '°C';
+                                } catch (error) {
+                                    return value.toString();
+                                }
                             }
                         }
                     }

@@ -167,3 +167,4 @@ class APIClient {
 
 // 创建全局API客户端实例
 const apiClient = new APIClient();
+window.apiClient = apiClient;

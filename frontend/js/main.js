@@ -315,6 +315,24 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('window.apiClient:', window.apiClient);
         console.log('AppConfig:', typeof AppConfig);
         
+        // 检查apiClient是否已定义
+        if (!window.apiClient) {
+            console.warn('apiClient未定义，尝试继续初始化...');
+            // 尝试手动创建apiClient
+            if (typeof APIClient !== 'undefined') {
+                console.log('APIClient类已定义，尝试创建实例...');
+                window.apiClient = new APIClient();
+                console.log('手动创建apiClient成功:', window.apiClient);
+            } else {
+                console.error('APIClient类未定义，api.js可能未正确加载');
+                // 显示警告信息
+                const errorMsg = document.createElement('div');
+                errorMsg.style.cssText = 'padding: 20px; background: #fff3cd; color: #856404; margin: 10px; border-radius: 5px;';
+                errorMsg.innerHTML = '<strong>警告:</strong> API客户端未正确加载。数据获取功能可能受限。';
+                document.querySelector('.main-content').prepend(errorMsg);
+            }
+        }
+        
         // 临时注释掉uiManager检查，让页面能够加载
         // 确保uiManager已定义
         if (!window.uiManager) {
