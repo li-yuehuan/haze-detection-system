@@ -1,0 +1,32 @@
+{
+  "name": "haze-detection-system",
+  "version": "1.0.0",
+  "description": "雾霾检测系统 - 基于高德地图和风天气API的雾霾监测与检测系统",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "nodemon backend/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "雾霾检测",
+    "天气监测",
+    "空气质量",
+    "高德地图",
+    "和风天气"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "jsonwebtoken": "^9.0.2",
+    "jose": "^5.0.0",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
