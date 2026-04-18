@@ -128,9 +128,15 @@ class APIClient {
       const headers = await this.getQWeatherAuthHeader();
       
       // 根据文档：GET /airquality/v1/current/{latitude}/{longitude}
-      const response = await this.qweatherClient.get(`/airquality/v1/current/${lat}/${lon}`, {
+      const url = `/airquality/v1/current/${lat}/${lon}`;
+      console.log(`调用空气质量API: ${url}, 纬度: ${lat}, 经度: ${lon}`);
+      
+      const response = await this.qweatherClient.get(url, {
         headers
       });
+
+      console.log('空气质量API响应状态:', response.status);
+      console.log('空气质量API响应数据:', JSON.stringify(response.data, null, 2));
 
       if (response.data.metadata && response.data.indexes) {
         return {
@@ -138,7 +144,7 @@ class APIClient {
           data: response.data
         };
       } else {
-        console.error('空气质量API响应错误:', response.data);
+        console.error('空气质量API响应格式错误:', response.data);
         return {
           success: false,
           error: '空气质量数据格式错误'
@@ -167,13 +173,16 @@ class APIClient {
       const headers = await this.getQWeatherAuthHeader();
       
       // 根据文档：GET /v7/weather/24h
+      const params = { location };
+      console.log(`调用24小时预报API, location: ${location}`);
+      
       const response = await this.qweatherClient.get('/v7/weather/24h', {
-        params: { 
-          location
-          // 注意：根据文档，不需要key参数，只需要JWT认证头
-        },
+        params,
         headers
       });
+
+      console.log('24小时预报API响应状态:', response.status);
+      console.log('24小时预报API响应数据:', JSON.stringify(response.data, null, 2));
 
       if (response.data.code === '200') {
         return {
@@ -184,7 +193,7 @@ class APIClient {
         console.error('天气预报API响应错误:', response.data);
         return {
           success: false,
-          error: `预报API错误: ${response.data.code}`
+          error: `预报API错误: ${response.data.code} - ${response.data.message || '未知错误'}`
         };
       }
     } catch (error) {
