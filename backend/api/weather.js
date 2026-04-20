@@ -2,51 +2,75 @@ const express = require('express');
 const router = express.Router();
 const apiClient = require('../utils/apiClient');
 
-// 从矩形字符串中提取经纬度
-function extractCoordinates(rectangle) {
-  if (!rectangle) return { lat: 39.90, lon: 116.41 }; // 默认北京，2位小数
+// 从位置数据中提取经纬度
+function extractCoordinates(locationData) {
+  if (!locationData) return { lat: 39.90, lon: 116.41 }; // 默认北京，2位小数
   
   try {
-    // 矩形格式: "116.123,39.456;116.789,39.012"
-    const [point1, point2] = rectangle.split(';');
-    const [lon1, lat1] = point1.split(',').map(Number);
-    const [lon2, lat2] = point2.split(',').map(Number);
+    // 优先使用coordinates字段
+    if (locationData.coordinates) {
+      const { longitude, latitude } = locationData.coordinates;
+      return { 
+        lat: parseFloat(latitude.toFixed(2)), 
+        lon: parseFloat(longitude.toFixed(2)) 
+      };
+    }
     
-    // 计算中心点
-    const lat = (lat1 + lat2) / 2;
-    const lon = (lon1 + lon2) / 2;
+    // 其次使用rectangle字段
+    if (locationData.rectangle) {
+      // 矩形格式: "116.123,39.456;116.789,39.012"
+      const [point1, point2] = locationData.rectangle.split(';');
+      const [lon1, lat1] = point1.split(',').map(Number);
+      const [lon2, lat2] = point2.split(',').map(Number);
+      
+      // 计算中心点
+      const lat = (lat1 + lat2) / 2;
+      const lon = (lon1 + lon2) / 2;
+      
+      return { 
+        lat: parseFloat(lat.toFixed(2)), 
+        lon: parseFloat(lon.toFixed(2)) 
+      };
+    }
     
-    // 根据API文档要求：最多支持小数点后两位
-    return { 
-      lat: parseFloat(lat.toFixed(2)), 
-      lon: parseFloat(lon.toFixed(2)) 
-    };
+    // 都没有则使用默认
+    return { lat: 39.90, lon: 116.41 };
   } catch (error) {
     console.error('解析坐标失败:', error);
-    return { lat: 39.90, lon: 116.41 }; // 默认北京，2位小数
+    return { lat: 39.90, lon: 116.41 };
   }
 }
 
-// 获取位置坐标（从rectangle提取经纬度）
-function getLocationCoordinates(rectangle) {
-  if (!rectangle) return '116.41,39.90'; // 默认北京坐标，2位小数
+// 获取位置坐标字符串
+function getLocationCoordinates(locationData) {
+  if (!locationData) return '116.41,39.90'; // 默认北京坐标，2位小数
   
   try {
-    // 矩形格式: "116.123,39.456;116.789,39.012"
-    const [point1, point2] = rectangle.split(';');
-    const [lon1, lat1] = point1.split(',').map(Number);
-    const [lon2, lat2] = point2.split(',').map(Number);
+    // 优先使用coordinates字段
+    if (locationData.coordinates) {
+      const { longitude, latitude } = locationData.coordinates;
+      return `${longitude.toFixed(2)},${latitude.toFixed(2)}`;
+    }
     
-    // 计算中心点
-    const lat = (lat1 + lat2) / 2;
-    const lon = (lon1 + lon2) / 2;
+    // 其次使用rectangle字段
+    if (locationData.rectangle) {
+      // 矩形格式: "116.123,39.456;116.789,39.012"
+      const [point1, point2] = locationData.rectangle.split(';');
+      const [lon1, lat1] = point1.split(',').map(Number);
+      const [lon2, lat2] = point2.split(',').map(Number);
+      
+      // 计算中心点
+      const lat = (lat1 + lat2) / 2;
+      const lon = (lon1 + lon2) / 2;
+      
+      return `${lon.toFixed(2)},${lat.toFixed(2)}`;
+    }
     
-    // 返回经纬度字符串，格式：经度,纬度
-    // 根据API文档要求：最多支持小数点后两位
-    return `${lon.toFixed(2)},${lat.toFixed(2)}`;
+    // 都没有则使用默认
+    return '116.41,39.90';
   } catch (error) {
     console.error('解析坐标失败:', error);
-    return '116.41,39.90'; // 默认北京坐标，2位小数
+    return '116.41,39.90';
   }
 }
 
@@ -55,15 +79,23 @@ router.get('/comprehensive', async (req, res) => {
   try {
     const { city, province, adcode, rectangle } = req.query;
     
-    if (!adcode && !rectangle) {
-      return res.status(400).json({
-        success: false,
-        error: '请提供位置信息（adcode或rectangle）'
-      });
+    // 构建位置数据对象
+    const locationData = {
+      city: city || '未知',
+      province: province || '未知',
+      adcode: adcode || '',
+      rectangle: rectangle || ''
+    };
+    
+    // 如果没有rectangle，尝试从其他参数构建
+    if (!rectangle && city && province) {
+      // 这里可以添加根据城市名获取坐标的逻辑
+      // 暂时使用默认坐标，但会记录警告
+      console.warn(`没有提供坐标信息，使用默认坐标: ${city}, ${province}`);
     }
 
-    const locationCoordinates = rectangle ? getLocationCoordinates(rectangle) : '116.41,39.90';
-    const coordinates = rectangle ? extractCoordinates(rectangle) : { lat: 39.90, lon: 116.41 };
+    const locationCoordinates = getLocationCoordinates(locationData);
+    const coordinates = extractCoordinates(locationData);
 
     console.log(`获取综合天气信息，位置: ${city || '未知'}, 坐标: ${JSON.stringify(coordinates)}`);
 

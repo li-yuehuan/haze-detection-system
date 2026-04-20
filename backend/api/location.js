@@ -53,12 +53,25 @@ router.get('/current', async (req, res) => {
 
     const locationData = locationResult.data;
     
+    // 确保位置数据包含坐标信息
+    let coordinates = locationData.coordinates;
+    let rectangle = locationData.rectangle;
+    
+    // 如果没有rectangle但有coordinates，从coordinates生成rectangle
+    if (!rectangle && coordinates) {
+      const { longitude, latitude } = coordinates;
+      // 创建一个小范围的矩形（±0.01度）
+      rectangle = `${(longitude - 0.01).toFixed(6)},${(latitude - 0.01).toFixed(6)};${(longitude + 0.01).toFixed(6)},${(latitude + 0.01).toFixed(6)}`;
+      locationData.rectangle = rectangle;
+    }
+    
     // 保存位置信息到本地存储
     dataStorage.addLocation({
       ...locationData,
       ip: clientIP,
       source: locationSource,
-      coordinates: locationData.coordinates || null,
+      coordinates: coordinates || null,
+      rectangle: rectangle || null,
       timestamp: new Date().toISOString()
     });
 
