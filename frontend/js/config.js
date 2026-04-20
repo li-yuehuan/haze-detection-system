@@ -142,12 +142,10 @@ const AppConfig = {
     
     // 默认设置
     DEFAULT_SETTINGS: {
-        autoLocation: true,
         airQualityAlert: true,
         updateFrequency: 10,
         theme: 'light',
-        chartAnimation: true,
-        manualCity: ''
+        chartAnimation: true
     }
 };
 

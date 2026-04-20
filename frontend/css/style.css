@@ -157,6 +157,25 @@ body {
     gap: 15px;
     font-size: 0.9rem;
     color: var(--text-secondary);
+    flex-wrap: wrap;
+}
+
+.location-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    background-color: var(--bg-color);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    cursor: help;
+}
+
+.location-source i {
+    font-size: 0.8rem;
+    color: var(--primary-color);
 }
 
 .header-actions {

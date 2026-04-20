@@ -40,11 +40,6 @@ class UIManager {
             this.resetSettings();
         });
 
-        // 设置城市按钮
-        document.getElementById('set-city-btn').addEventListener('click', () => {
-            this.setManualCity();
-        });
-
         // 图表控制按钮
         document.getElementById('temp-chart-btn').addEventListener('click', () => {
             this.setChartMode('temperature');
@@ -107,12 +102,10 @@ class UIManager {
     // 保存设置
     saveSettings() {
         try {
-            this.settings.autoLocation = document.getElementById('auto-location').checked;
             this.settings.airQualityAlert = document.getElementById('air-quality-alert').checked;
             this.settings.updateFrequency = parseInt(document.getElementById('update-frequency').value);
             this.settings.theme = document.getElementById('theme-select').value;
             this.settings.chartAnimation = document.getElementById('chart-animation').checked;
-            this.settings.manualCity = document.getElementById('manual-city').value;
             
             localStorage.setItem('haze-prediction-settings', JSON.stringify(this.settings));
             
@@ -139,12 +132,10 @@ class UIManager {
 
     // 更新设置UI
     updateSettingsUI() {
-        document.getElementById('auto-location').checked = this.settings.autoLocation;
         document.getElementById('air-quality-alert').checked = this.settings.airQualityAlert;
         document.getElementById('update-frequency').value = this.settings.updateFrequency;
         document.getElementById('theme-select').value = this.settings.theme;
         document.getElementById('chart-animation').checked = this.settings.chartAnimation;
-        document.getElementById('manual-city').value = this.settings.manualCity;
     }
 
     // 应用主题
@@ -167,32 +158,6 @@ class UIManager {
     // 关闭设置面板
     closeSettings() {
         document.getElementById('settings-panel').classList.remove('active');
-    }
-
-    // 设置手动城市
-    async setManualCity() {
-        const cityInput = document.getElementById('manual-city');
-        const city = cityInput.value.trim();
-        
-        if (!city) {
-            this.showNotification('请输入城市名称', 'warning');
-            return;
-        }
-        
-        try {
-            // 这里可以添加城市验证逻辑
-            // 暂时假设城市格式为"城市,省份"
-            const [cityName, province] = city.split(',').map(s => s.trim());
-            
-            await apiClient.setManualLocation(cityName, province || cityName);
-            this.settings.manualCity = city;
-            this.saveSettings();
-            this.refreshAllData();
-            this.showNotification(`已切换到 ${city}`, 'success');
-        } catch (error) {
-            console.error('设置城市失败:', error);
-            this.showNotification('设置城市失败', 'error');
-        }
     }
 
     // 显示通知
@@ -241,8 +206,48 @@ class UIManager {
         
         this.currentLocation = locationData;
         
+        // 显示城市和省份
         document.getElementById('current-city').textContent = locationData.city || '未知';
         document.getElementById('location-province').textContent = locationData.province || '';
+        
+        // 显示定位来源信息
+        if (locationData.source) {
+            let sourceText = '';
+            let sourceIcon = '';
+            
+            switch (locationData.source) {
+                case 'browser':
+                    sourceText = '浏览器定位';
+                    sourceIcon = 'fas fa-location-dot';
+                    break;
+                case 'ip':
+                    sourceText = 'IP定位';
+                    sourceIcon = 'fas fa-globe';
+                    break;
+                case 'ip_fallback':
+                    sourceText = 'IP定位（浏览器定位失败）';
+                    sourceIcon = 'fas fa-exclamation-triangle';
+                    break;
+                case 'reverse_geocode':
+                    sourceText = '坐标定位';
+                    sourceIcon = 'fas fa-map-marker-alt';
+                    break;
+                default:
+                    sourceText = '定位';
+                    sourceIcon = 'fas fa-map-marker-alt';
+            }
+            
+            // 如果有详细地址，显示详细地址
+            if (locationData.formattedAddress) {
+                const locationDetails = document.getElementById('location-province');
+                locationDetails.innerHTML = `
+                    <span>${locationData.province || ''}</span>
+                    <span class="location-source" title="${locationData.formattedAddress}">
+                        <i class="${sourceIcon}"></i> ${sourceText}
+                    </span>
+                `;
+            }
+        }
         
         // 更新时间显示
         this.updateTimeDisplay();
@@ -503,7 +508,7 @@ class UIManager {
         try {
             this.showNotification('正在更新数据...', 'info');
             
-            // 获取位置
+            // 获取位置（始终使用浏览器定位，失败时回退到IP定位）
             const locationResponse = await apiClient.getCurrentLocation();
             this.updateLocationDisplay(locationResponse.data);
             

@@ -85,17 +85,84 @@ class APIClient {
         }
     }
 
-    // 获取当前位置
+    // 获取当前位置（优先使用浏览器定位，失败时回退到IP定位）
     async getCurrentLocation() {
-        return this.request(AppConfig.API_ENDPOINTS.LOCATION_CURRENT);
+        // 优先尝试浏览器定位
+        if ('geolocation' in navigator) {
+            try {
+                const position = await this.getBrowserPosition(10000);
+                const { latitude, longitude, accuracy } = position.coords;
+                
+                console.log(`浏览器定位成功: 纬度=${latitude}, 经度=${longitude}, 精度=${accuracy}米`);
+                
+                // 使用经纬度调用后端API
+                const endpoint = `${AppConfig.API_ENDPOINTS.LOCATION_CURRENT}?longitude=${longitude}&latitude=${latitude}`;
+                const result = await this.request(endpoint);
+                
+                // 添加浏览器定位信息
+                if (result.success && result.data) {
+                    result.data.browserLocation = {
+                        coordinates: { latitude, longitude },
+                        accuracy,
+                        timestamp: position.timestamp
+                    };
+                }
+                
+                return result;
+            } catch (browserError) {
+                console.warn('浏览器定位失败，回退到IP定位:', browserError.message);
+                // 浏览器定位失败，回退到IP定位
+                return this.request(AppConfig.API_ENDPOINTS.LOCATION_CURRENT);
+            }
+        } else {
+            // 浏览器不支持地理位置API，直接使用IP定位
+            console.log('浏览器不支持地理位置API，使用IP定位');
+            return this.request(AppConfig.API_ENDPOINTS.LOCATION_CURRENT);
+        }
     }
 
-    // 设置手动位置
-    async setManualLocation(city, province, adcode = '') {
-        return this.request(AppConfig.API_ENDPOINTS.LOCATION_SET, {
-            method: 'POST',
-            body: { city, province, adcode }
+    // 获取浏览器地理位置
+    getBrowserPosition(timeout = 10000) {
+        return new Promise((resolve, reject) => {
+            if (!('geolocation' in navigator)) {
+                reject(new Error('浏览器不支持地理位置API'));
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: timeout,
+                maximumAge: 60000 // 1分钟缓存
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                resolve,
+                (error) => {
+                    let errorMessage;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = '用户拒绝了地理位置权限请求';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = '位置信息不可用';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = '获取位置信息超时';
+                            break;
+                        default:
+                            errorMessage = '未知错误';
+                    }
+                    reject(new Error(errorMessage));
+                },
+                options
+            );
         });
+    }
+
+    // 逆地理编码（将经纬度转换为地址）
+    async reverseGeocode(longitude, latitude) {
+        const endpoint = `${AppConfig.API_ENDPOINTS.LOCATION_CURRENT}?longitude=${longitude}&latitude=${latitude}`;
+        return this.request(endpoint);
     }
 
     // 获取综合天气信息

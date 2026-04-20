@@ -208,6 +208,57 @@ class APIClient {
       };
     }
   }
+
+  /**
+   * 通过经纬度逆地理编码获取位置信息（高德地图API）
+   * @param {number} longitude - 经度
+   * @param {number} latitude - 纬度
+   * @returns {Promise<Object>} 位置信息
+   */
+  async getLocationByCoordinates(longitude, latitude) {
+    try {
+      // 高德地图逆地理编码API
+      const response = await this.amapClient.get('/geocode/regeo', {
+        params: {
+          key: this.amapApiKey,
+          location: `${longitude.toFixed(6)},${latitude.toFixed(6)}`,
+          extensions: 'base',
+          output: 'JSON'
+        }
+      });
+
+      if (response.data.status === '1') {
+        const regeocode = response.data.regeocode;
+        const addressComponent = regeocode.addressComponent;
+        
+        return {
+          success: true,
+          data: {
+            province: addressComponent.province,
+            city: addressComponent.city || addressComponent.province,
+            district: addressComponent.district,
+            adcode: addressComponent.adcode,
+            formattedAddress: regeocode.formatted_address,
+            coordinates: {
+              longitude: parseFloat(longitude.toFixed(6)),
+              latitude: parseFloat(latitude.toFixed(6))
+            }
+          }
+        };
+      } else {
+        return {
+          success: false,
+          error: response.data.info || '逆地理编码失败'
+        };
+      }
+    } catch (error) {
+      console.error('高德地图逆地理编码API调用失败:', error.message);
+      return {
+        success: false,
+        error: '逆地理编码网络请求失败'
+      };
+    }
+  }
 }
 
 module.exports = new APIClient();
