@@ -14,7 +14,7 @@
     --border-color: #e0e0e0;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     
-    --header-height: 70px;
+    --header-height: 90px;
     --footer-height: 60px;
     --border-radius: 12px;
     --transition: all 0.3s ease;
@@ -112,7 +112,7 @@ body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 10px 0;
+    padding: 15px 0;
 }
 
 .logo {
@@ -160,6 +160,12 @@ body {
     flex-wrap: wrap;
 }
 
+.location-province {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-right: 10px;
+}
+
 .location-source {
     display: inline-flex;
     align-items: center;
@@ -170,12 +176,26 @@ body {
     font-size: 0.8rem;
     color: var(--text-secondary);
     border: 1px solid var(--border-color);
-    cursor: help;
 }
 
 .location-source i {
     font-size: 0.8rem;
     color: var(--primary-color);
+}
+
+.location-address {
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    padding: 5px 0;
+    border-top: 1px dashed var(--border-color);
+}
+
+.location-address i {
+    color: var(--primary-color);
+    margin-right: 5px;
+    font-size: 0.8rem;
 }
 
 .header-actions {

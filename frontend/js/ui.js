@@ -208,9 +208,8 @@ class UIManager {
         
         // 显示城市和省份
         document.getElementById('current-city').textContent = locationData.city || '未知';
-        document.getElementById('location-province').textContent = locationData.province || '';
         
-        // 显示定位来源信息
+        // 显示定位来源信息和详细地址
         if (locationData.source) {
             let sourceText = '';
             let sourceIcon = '';
@@ -237,16 +236,35 @@ class UIManager {
                     sourceIcon = 'fas fa-map-marker-alt';
             }
             
-            // 如果有详细地址，显示详细地址
+            // 构建位置信息HTML
+            const locationDetails = document.getElementById('location-province');
+            let locationHTML = '';
+            
+            // 显示省份
+            if (locationData.province) {
+                locationHTML += `<span class="location-province">${locationData.province}</span>`;
+            }
+            
+            // 显示定位来源
+            locationHTML += `
+                <span class="location-source">
+                    <i class="${sourceIcon}"></i> ${sourceText}
+                </span>
+            `;
+            
+            // 如果有详细地址，直接显示（不再使用tooltip）
             if (locationData.formattedAddress) {
-                const locationDetails = document.getElementById('location-province');
-                locationDetails.innerHTML = `
-                    <span>${locationData.province || ''}</span>
-                    <span class="location-source" title="${locationData.formattedAddress}">
-                        <i class="${sourceIcon}"></i> ${sourceText}
-                    </span>
+                locationHTML += `
+                    <div class="location-address">
+                        <i class="fas fa-map-pin"></i> ${locationData.formattedAddress}
+                    </div>
                 `;
             }
+            
+            locationDetails.innerHTML = locationHTML;
+        } else {
+            // 没有定位来源信息，只显示省份
+            document.getElementById('location-province').textContent = locationData.province || '';
         }
         
         // 更新时间显示
